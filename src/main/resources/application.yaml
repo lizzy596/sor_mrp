@@ -1,0 +1,46 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: ${API_NAME:sor_msr}
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:mydb}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:secret}
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${PORT:8080}
+
+logging:
+  level:
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-expiration-minutes: ${JWT_ACCESS_EXPIRATION_MINUTES:30}
+  refresh-expiration-days: ${JWT_REFRESH_EXPIRATION_DAYS:30}
+  reset-password-expiration-minutes: ${JWT_RESET_PASSWORD_EXPIRATION_MINUTES:10}
+  verify-email-expiration-minutes: ${JWT_VERIFY_EMAIL_EXPIRATION_MINUTES:10}
+  refresh-cookie: ${JWT_REFRESH_COOKIE:refreshCookie}
+
+app:
+  auth:
+    strict-mode: ${AUTH_STRICT_MODE:true}
+  google:
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
+  mail:
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+    from: ${EMAIL_FROM}s
