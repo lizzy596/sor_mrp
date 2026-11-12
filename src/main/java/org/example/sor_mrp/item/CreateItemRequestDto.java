@@ -9,6 +9,9 @@ public class CreateItemRequestDto {
     @NotBlank(message = "Item number cannot be blank")
     private String itemNumber;
 
+    @NotNull(message = "Item type is required")
+    private ItemType itemType;
+
     @NotNull(message = "Quantity is required")
     @Min(value = 0, message = "Quantity cannot be negative")
     private Integer quantity;
@@ -19,8 +22,9 @@ public class CreateItemRequestDto {
     public CreateItemRequestDto() {}
 
     // All-args constructor
-    public CreateItemRequestDto(String itemNumber, Integer quantity, String description) {
+    public CreateItemRequestDto(String itemNumber, ItemType itemType, Integer quantity, String description) {
         this.itemNumber = itemNumber;
+        this.itemType = itemType;
         this.quantity = quantity;
         this.description = description;
     }
@@ -32,6 +36,14 @@ public class CreateItemRequestDto {
 
     public void setItemNumber(String itemNumber) {
         this.itemNumber = itemNumber;
+    }
+
+    public ItemType getItemType() {
+        return itemType;
+    }
+
+    public void setItemType(ItemType itemType) {
+        this.itemType = itemType;
     }
 
     public Integer getQuantity() {

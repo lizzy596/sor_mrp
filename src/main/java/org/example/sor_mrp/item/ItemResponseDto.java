@@ -4,6 +4,7 @@ public class ItemResponseDto {
 
     private Long id;
     private String itemNumber;
+    private ItemType itemType;
     private Integer quantity;
     private String description;
 
@@ -11,18 +12,20 @@ public class ItemResponseDto {
     public ItemResponseDto() {}
 
     // All-args constructor
-    public ItemResponseDto(Long id, String itemNumber, Integer quantity, String description) {
+    public ItemResponseDto(Long id, String itemNumber, ItemType itemType, Integer quantity, String description) {
         this.id = id;
         this.itemNumber = itemNumber;
+        this.itemType = itemType;
         this.quantity = quantity;
         this.description = description;
     }
 
-    // --- ADD THIS METHOD ---
+    // Factory method to map domain model to response DTO
     public static ItemResponseDto fromItem(Item item) {
         return new ItemResponseDto(
                 item.getId(),
                 item.getItemNumber(),
+                item.getItemType(),
                 item.getQuantity(),
                 item.getDescription()
         );
@@ -43,6 +46,14 @@ public class ItemResponseDto {
 
     public void setItemNumber(String itemNumber) {
         this.itemNumber = itemNumber;
+    }
+
+    public ItemType getItemType() {
+        return itemType;
+    }
+
+    public void setItemType(ItemType itemType) {
+        this.itemType = itemType;
     }
 
     public Integer getQuantity() {

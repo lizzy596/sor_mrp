@@ -24,6 +24,7 @@ public class ItemService {
         // 2. Map DTO to Domain Model
         Item item = new Item();
         item.setItemNumber(request.getItemNumber());
+        item.setItemType(request.getItemType() != null ? request.getItemType() : ItemType.RAW_MATERIAL);
         item.setQuantity(request.getQuantity());
         item.setDescription(request.getDescription());
 
@@ -53,6 +54,7 @@ public class ItemService {
 
         // 3. Update fields from the request DTO
         existingItem.setItemNumber(request.getItemNumber());
+        existingItem.setItemType(request.getItemType());
         existingItem.setQuantity(request.getQuantity());
         existingItem.setDescription(request.getDescription());
 

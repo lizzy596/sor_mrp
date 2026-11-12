@@ -8,6 +8,7 @@ public class Item {
     private String itemNumber;
     private Integer quantity;
     private String description;
+    private ItemType itemType;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -15,11 +16,12 @@ public class Item {
     public Item() {}
 
     // All-args constructor for convenient instantiation
-    public Item(Long id, String itemNumber, Integer quantity, String description, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Item(Long id, String itemNumber, Integer quantity, String description, ItemType itemType, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.itemNumber = itemNumber;
         this.quantity = quantity;
         this.description = description;
+        this.itemType = itemType;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -57,11 +59,29 @@ public class Item {
         this.description = description;
     }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public ItemType getItemType() {
+        return itemType;
+    }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setItemType(ItemType itemType) {
+        this.itemType = itemType;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
     // --- Nice-to-Have Methods ---
 
@@ -72,6 +92,7 @@ public class Item {
                 ", itemNumber='" + itemNumber + '\'' +
                 ", quantity=" + quantity +
                 ", description='" + description + '\'' +
+                ", itemType=" + itemType +
                 '}';
     }
 }

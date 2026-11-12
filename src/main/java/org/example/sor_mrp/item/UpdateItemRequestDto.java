@@ -15,14 +15,18 @@ public class UpdateItemRequestDto {
 
     private String description;
 
+    @NotNull(message = "Item type is required")
+    private ItemType itemType;
+
     // Default no-args constructor
     public UpdateItemRequestDto() {}
 
     // All-args constructor
-    public UpdateItemRequestDto(String itemNumber, Integer quantity, String description) {
+    public UpdateItemRequestDto(String itemNumber, Integer quantity, String description, ItemType itemType) {
         this.itemNumber = itemNumber;
         this.quantity = quantity;
         this.description = description;
+        this.itemType = itemType;
     }
 
     // Getters and Setters
@@ -48,5 +52,13 @@ public class UpdateItemRequestDto {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public ItemType getItemType() {
+        return itemType;
+    }
+
+    public void setItemType(ItemType itemType) {
+        this.itemType = itemType;
     }
 }

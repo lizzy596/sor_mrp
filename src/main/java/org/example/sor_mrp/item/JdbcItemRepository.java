@@ -23,8 +23,14 @@ public class JdbcItemRepository implements ItemRepository {
         Item item = new Item();
         item.setId(rs.getLong("id"));
         item.setItemNumber(rs.getString("item_number"));
+
+        String itemTypeStr = rs.getString("item_type");
+        if (itemTypeStr != null) {
+            item.setItemType(ItemType.valueOf(itemTypeStr));
+        }
+
         item.setQuantity(rs.getInt("quantity"));
-        item.setDescription(rs.getString("description")); // Fixed syntax here
+        item.setDescription(rs.getString("description"));
 
         if (rs.getTimestamp("created_at") != null) {
             item.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
@@ -38,15 +44,16 @@ public class JdbcItemRepository implements ItemRepository {
     @Override
     public Item save(Item item) {
         String sql = """
-            INSERT INTO items (item_number, quantity, description)
-            VALUES (:itemNumber, :quantity, :description)
+            INSERT INTO items (item_number, item_type, quantity, description)
+            VALUES (:itemNumber, :itemType, :quantity, :description)
             RETURNING id, created_at, updated_at
         """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("itemNumber", item.getItemNumber())
+                .addValue("itemType", item.getItemType() != null ? item.getItemType().name() : ItemType.RAW_MATERIAL.name())
                 .addValue("quantity", item.getQuantity())
-                .addValue("description", item.getDescription()); // Added closing semicolon
+                .addValue("description", item.getDescription());
 
         return jdbcTemplate.queryForObject(sql, params, (rs, rowNum) -> {
             item.setId(rs.getLong("id"));
@@ -62,7 +69,7 @@ public class JdbcItemRepository implements ItemRepository {
 
     @Override
     public Optional<Item> findById(Long id) {
-        String sql = "SELECT id, item_number, quantity, description, created_at, updated_at FROM items WHERE id = :id";
+        String sql = "SELECT id, item_number, item_type, quantity, description, created_at, updated_at FROM items WHERE id = :id";
         MapSqlParameterSource params = new MapSqlParameterSource().addValue("id", id);
 
         List<Item> results = jdbcTemplate.query(sql, params, itemRowMapper);
@@ -71,7 +78,7 @@ public class JdbcItemRepository implements ItemRepository {
 
     @Override
     public Optional<Item> findByItemNumber(String itemNumber) {
-        String sql = "SELECT id, item_number, quantity, description, created_at, updated_at FROM items WHERE item_number = :itemNumber";
+        String sql = "SELECT id, item_number, item_type, quantity, description, created_at, updated_at FROM items WHERE item_number = :itemNumber";
         MapSqlParameterSource params = new MapSqlParameterSource().addValue("itemNumber", itemNumber);
 
         List<Item> results = jdbcTemplate.query(sql, params, itemRowMapper);
@@ -82,14 +89,15 @@ public class JdbcItemRepository implements ItemRepository {
     public Item update(Long id, Item item) {
         String sql = """
             UPDATE items 
-            SET item_number = :itemNumber, quantity = :quantity, description = :description, updated_at = CURRENT_TIMESTAMP
+            SET item_number = :itemNumber, item_type = :itemType, quantity = :quantity, description = :description, updated_at = CURRENT_TIMESTAMP
             WHERE id = :id
-            RETURNING id, item_number, quantity, description, created_at, updated_at
+            RETURNING id, item_number, item_type, quantity, description, created_at, updated_at
         """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", id)
                 .addValue("itemNumber", item.getItemNumber())
+                .addValue("itemType", item.getItemType() != null ? item.getItemType().name() : ItemType.RAW_MATERIAL.name())
                 .addValue("quantity", item.getQuantity())
                 .addValue("description", item.getDescription());
 
@@ -107,12 +115,12 @@ public class JdbcItemRepository implements ItemRepository {
     public JdbcPaginationHelper.PaginatedResult<Item> findAllFiltered(
             Map<String, String> filters, String search, int page, int size, String sortBy, String sortDir
     ) {
-        List<String> allowedColumns = List.of("id", "item_number", "quantity", "description", "created_at", "updated_at");
+        List<String> allowedColumns = List.of("id", "item_number", "item_type", "quantity", "description", "created_at", "updated_at");
         List<String> searchableColumns = List.of("item_number");
 
         return JdbcPaginationHelper.paginate(
-                jdbcTemplate, // Your NamedParameterJdbcTemplate
-                "items",      // Table name
+                jdbcTemplate,
+                "items",
                 filters,
                 search,
                 searchableColumns,
