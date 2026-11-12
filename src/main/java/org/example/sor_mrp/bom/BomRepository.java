@@ -1,25 +1,29 @@
 package org.example.sor_mrp.bom;
 
-import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper.PaginatedResult;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper.PaginatedResult;
 
 public interface BomRepository {
 
-    Bom save(Bom bom);
+  Bom save(Bom bom);
 
-    Optional<Bom> findById(Long id);
+  Optional<Bom> findById(Long id);
 
-    List<Bom> findByParentItemId(Long parentItemId);
+  List<Bom> findByParentItemId(Long parentItemId);
 
-    List<Bom> findByChildItemId(Long childItemId);
+  List<Bom> findByChildItemId(Long childItemId);
 
-    void deleteById(Long id);
+  void deleteById(Long id);
 
-    boolean existsByParentAndChild(Long parentItemId, Long childItemId);
+  boolean existsByParentAndChild(Long parentItemId, Long childItemId);
 
-
-    PaginatedResult<BomDetail> findDetailedPaginated(
-            int page, int size, String sortBy, String sortDir, String search, Map<String, String> filters);
+  PaginatedResult<BomDetail> findDetailedPaginated(
+      int page,
+      int size,
+      String sortBy,
+      String sortDir,
+      String search,
+      Map<String, String> filters);
 }

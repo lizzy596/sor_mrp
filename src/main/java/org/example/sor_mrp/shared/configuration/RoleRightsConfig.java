@@ -10,9 +10,17 @@ public class RoleRightsConfig {
   private final Map<String, List<String>> rights =
       Map.of(
           "user", List.of("getUsers", "getItems", "getBoms"),
-          "admin", List.of("getUsers", "manageUsers", "deleteUser", "getItems", "manageItems", "manageBoms"),
+          "admin",
+              List.of(
+                  "getUsers", "manageUsers", "deleteUser", "getItems", "manageItems", "manageBoms"),
           "systemAdmin",
-              List.of("getUsers", "manageUsers", "deleteUser", "getItems", "manageItems", "manageBoms"));
+              List.of(
+                  "getUsers",
+                  "manageUsers",
+                  "deleteUser",
+                  "getItems",
+                  "manageItems",
+                  "manageBoms"));
 
   public List<String> getRightsForRole(String role) {
     return rights.getOrDefault(role, List.of());
