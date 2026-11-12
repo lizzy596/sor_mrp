@@ -6,59 +6,60 @@ import jakarta.validation.constraints.NotNull;
 
 public class UpdateItemRequestDto {
 
-    @NotBlank(message = "Item number cannot be blank")
-    private String itemNumber;
+  @NotBlank(message = "Item number cannot be blank")
+  private String itemNumber;
 
-    @NotNull(message = "Quantity is required")
-    @Min(value = 0, message = "Quantity cannot be negative")
-    private Integer quantity;
+  @NotNull(message = "Quantity is required")
+  @Min(value = 0, message = "Quantity cannot be negative")
+  private Integer quantity;
 
-    private String description;
+  private String description;
 
-    @NotNull(message = "Item type is required")
-    private ItemType itemType;
+  @NotNull(message = "Item type is required")
+  private ItemType itemType;
 
-    // Default no-args constructor
-    public UpdateItemRequestDto() {}
+  // Default no-args constructor
+  public UpdateItemRequestDto() {}
 
-    // All-args constructor
-    public UpdateItemRequestDto(String itemNumber, Integer quantity, String description, ItemType itemType) {
-        this.itemNumber = itemNumber;
-        this.quantity = quantity;
-        this.description = description;
-        this.itemType = itemType;
-    }
+  // All-args constructor
+  public UpdateItemRequestDto(
+      String itemNumber, Integer quantity, String description, ItemType itemType) {
+    this.itemNumber = itemNumber;
+    this.quantity = quantity;
+    this.description = description;
+    this.itemType = itemType;
+  }
 
-    // Getters and Setters
-    public String getItemNumber() {
-        return itemNumber;
-    }
+  // Getters and Setters
+  public String getItemNumber() {
+    return itemNumber;
+  }
 
-    public void setItemNumber(String itemNumber) {
-        this.itemNumber = itemNumber;
-    }
+  public void setItemNumber(String itemNumber) {
+    this.itemNumber = itemNumber;
+  }
 
-    public Integer getQuantity() {
-        return quantity;
-    }
+  public Integer getQuantity() {
+    return quantity;
+  }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
+  public void setQuantity(Integer quantity) {
+    this.quantity = quantity;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-    public ItemType getItemType() {
-        return itemType;
-    }
+  public ItemType getItemType() {
+    return itemType;
+  }
 
-    public void setItemType(ItemType itemType) {
-        this.itemType = itemType;
-    }
+  public void setItemType(ItemType itemType) {
+    this.itemType = itemType;
+  }
 }

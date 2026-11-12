@@ -6,59 +6,60 @@ import jakarta.validation.constraints.NotNull;
 
 public class CreateItemRequestDto {
 
-    @NotBlank(message = "Item number cannot be blank")
-    private String itemNumber;
+  @NotBlank(message = "Item number cannot be blank")
+  private String itemNumber;
 
-    @NotNull(message = "Item type is required")
-    private ItemType itemType;
+  @NotNull(message = "Item type is required")
+  private ItemType itemType;
 
-    @NotNull(message = "Quantity is required")
-    @Min(value = 0, message = "Quantity cannot be negative")
-    private Integer quantity;
+  @NotNull(message = "Quantity is required")
+  @Min(value = 0, message = "Quantity cannot be negative")
+  private Integer quantity;
 
-    private String description; // Optional field
+  private String description; // Optional field
 
-    // Default no-args constructor (required for JSON deserialization)
-    public CreateItemRequestDto() {}
+  // Default no-args constructor (required for JSON deserialization)
+  public CreateItemRequestDto() {}
 
-    // All-args constructor
-    public CreateItemRequestDto(String itemNumber, ItemType itemType, Integer quantity, String description) {
-        this.itemNumber = itemNumber;
-        this.itemType = itemType;
-        this.quantity = quantity;
-        this.description = description;
-    }
+  // All-args constructor
+  public CreateItemRequestDto(
+      String itemNumber, ItemType itemType, Integer quantity, String description) {
+    this.itemNumber = itemNumber;
+    this.itemType = itemType;
+    this.quantity = quantity;
+    this.description = description;
+  }
 
-    // Getters and Setters
-    public String getItemNumber() {
-        return itemNumber;
-    }
+  // Getters and Setters
+  public String getItemNumber() {
+    return itemNumber;
+  }
 
-    public void setItemNumber(String itemNumber) {
-        this.itemNumber = itemNumber;
-    }
+  public void setItemNumber(String itemNumber) {
+    this.itemNumber = itemNumber;
+  }
 
-    public ItemType getItemType() {
-        return itemType;
-    }
+  public ItemType getItemType() {
+    return itemType;
+  }
 
-    public void setItemType(ItemType itemType) {
-        this.itemType = itemType;
-    }
+  public void setItemType(ItemType itemType) {
+    this.itemType = itemType;
+  }
 
-    public Integer getQuantity() {
-        return quantity;
-    }
+  public Integer getQuantity() {
+    return quantity;
+  }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
+  public void setQuantity(Integer quantity) {
+    this.quantity = quantity;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 }

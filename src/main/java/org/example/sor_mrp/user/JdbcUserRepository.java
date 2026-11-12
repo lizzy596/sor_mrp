@@ -1,25 +1,25 @@
 package org.example.sor_mrp.user;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 @Repository
 public class JdbcUserRepository implements UserRepository {
 
-    private final NamedParameterJdbcTemplate jdbcTemplate;
+  private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    public JdbcUserRepository(NamedParameterJdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+  public JdbcUserRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+    this.jdbcTemplate = jdbcTemplate;
+  }
 
-    private final RowMapper<User> userRowMapper = (rs, rowNum) -> {
+  private final RowMapper<User> userRowMapper =
+      (rs, rowNum) -> {
         User user = new User();
         user.setId(rs.getLong("id"));
         user.setFirstName(rs.getString("first_name"));
@@ -30,136 +30,152 @@ public class JdbcUserRepository implements UserRepository {
         user.setRole(rs.getString("role"));
         user.setIsEmailVerified(rs.getBoolean("is_email_verified"));
         if (rs.getTimestamp("created_at") != null) {
-            user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+          user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         }
         if (rs.getTimestamp("updated_at") != null) {
-            user.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+          user.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
         }
         return user;
-    };
+      };
 
-    @Override
-    public User save(User user) {
-        String sql = """
+  @Override
+  public User save(User user) {
+    String sql =
+        """
         INSERT INTO users (first_name, last_name, email, password, auth_type, role, is_email_verified)
         VALUES (:firstName, :lastName, :email, :password, :authType, :role, :isEmailVerified)
         RETURNING id, created_at, updated_at
     """;
 
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("firstName", user.getFirstName())
-                .addValue("lastName", user.getLastName())
-                .addValue("email", user.getEmail())
-                .addValue("password", user.getPassword())
-                .addValue("authType", user.getAuthType())
-                .addValue("role", user.getRole() != null ? user.getRole() : "user")
-                .addValue("isEmailVerified", user.getIsEmailVerified() != null ? user.getIsEmailVerified() : false);
+    MapSqlParameterSource params =
+        new MapSqlParameterSource()
+            .addValue("firstName", user.getFirstName())
+            .addValue("lastName", user.getLastName())
+            .addValue("email", user.getEmail())
+            .addValue("password", user.getPassword())
+            .addValue("authType", user.getAuthType())
+            .addValue("role", user.getRole() != null ? user.getRole() : "user")
+            .addValue(
+                "isEmailVerified",
+                user.getIsEmailVerified() != null ? user.getIsEmailVerified() : false);
 
-        // Use queryForObject with a RowMapper to cleanly capture the returned ID and timestamps
-        User savedUser = jdbcTemplate.queryForObject(sql, params, (rs, rowNum) -> {
-            user.setId(rs.getLong("id"));
-            if (rs.getTimestamp("created_at") != null) {
+    // Use queryForObject with a RowMapper to cleanly capture the returned ID and timestamps
+    User savedUser =
+        jdbcTemplate.queryForObject(
+            sql,
+            params,
+            (rs, rowNum) -> {
+              user.setId(rs.getLong("id"));
+              if (rs.getTimestamp("created_at") != null) {
                 user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-            }
-            if (rs.getTimestamp("updated_at") != null) {
+              }
+              if (rs.getTimestamp("updated_at") != null) {
                 user.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
-            }
-            return user;
-        });
+              }
+              return user;
+            });
 
-        return savedUser;
-    }
-    @Override
-    public Optional<User> findById(Long id) {
-        String sql = "SELECT * FROM users WHERE id = :id";
-        var params = new MapSqlParameterSource("id", id);
-        var users = jdbcTemplate.query(sql, params, userRowMapper);
-        return users.stream().findFirst();
-    }
+    return savedUser;
+  }
 
-    @Override
-    public Optional<User> findByEmail(String email) {
-        String sql = "SELECT * FROM users WHERE email = :email";
-        var params = new MapSqlParameterSource("email", email);
-        var users = jdbcTemplate.query(sql, params, userRowMapper);
-        return users.stream().findFirst();
-    }
+  @Override
+  public Optional<User> findById(Long id) {
+    String sql = "SELECT * FROM users WHERE id = :id";
+    var params = new MapSqlParameterSource("id", id);
+    var users = jdbcTemplate.query(sql, params, userRowMapper);
+    return users.stream().findFirst();
+  }
 
-    @Override
-    public User update(Long id, User user) {
-        String sql = """
-            UPDATE users 
-            SET first_name = :firstName, 
-                last_name = :lastName, 
-                role = :role, 
+  @Override
+  public Optional<User> findByEmail(String email) {
+    String sql = "SELECT * FROM users WHERE email = :email";
+    var params = new MapSqlParameterSource("email", email);
+    var users = jdbcTemplate.query(sql, params, userRowMapper);
+    return users.stream().findFirst();
+  }
+
+  @Override
+  public User update(Long id, User user) {
+    String sql =
+        """
+            UPDATE users
+            SET first_name = :firstName,
+                last_name = :lastName,
+                role = :role,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = :id
             RETURNING updated_at
         """;
 
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", id)
-                .addValue("firstName", user.getFirstName())
-                .addValue("lastName", user.getLastName())
-                .addValue("role", user.getRole());
+    MapSqlParameterSource params =
+        new MapSqlParameterSource()
+            .addValue("id", id)
+            .addValue("firstName", user.getFirstName())
+            .addValue("lastName", user.getLastName())
+            .addValue("role", user.getRole());
 
-        jdbcTemplate.query(sql, params, rs -> {
-            if (rs.next() && rs.getTimestamp("updated_at") != null) {
-                user.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
-            }
+    jdbcTemplate.query(
+        sql,
+        params,
+        rs -> {
+          if (rs.next() && rs.getTimestamp("updated_at") != null) {
+            user.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+          }
         });
 
-        user.setId(id);
-        return user;
-    }
+    user.setId(id);
+    return user;
+  }
 
-    @Override
-    public void deleteById(Long id) {
-        String sql = "DELETE FROM users WHERE id = :id";
-        var params = new MapSqlParameterSource("id", id);
-        jdbcTemplate.update(sql, params);
-    }
+  @Override
+  public void deleteById(Long id) {
+    String sql = "DELETE FROM users WHERE id = :id";
+    var params = new MapSqlParameterSource("id", id);
+    jdbcTemplate.update(sql, params);
+  }
 
+  @Override
+  public JdbcPaginationHelper.PaginatedResult<User> findAllFiltered(
+      Map<String, String> filters,
+      String search,
+      int page,
+      int size,
+      String sortBy,
+      String sortDir) {
+    List<String> allowedColumns =
+        List.of("id", "first_name", "last_name", "email", "role", "created_at", "updated_at");
+    List<String> searchableColumns = List.of("first_name", "last_name", "email");
 
-    @Override
-    public JdbcPaginationHelper.PaginatedResult<User> findAllFiltered(
-            Map<String, String> filters, String search, int page, int size, String sortBy, String sortDir
-    ) {
-        List<String> allowedColumns = List.of("id", "first_name", "last_name", "email", "role", "created_at", "updated_at");
-        List<String> searchableColumns = List.of("first_name", "last_name", "email");
-
-        return JdbcPaginationHelper.paginate(
-                jdbcTemplate, // Your NamedParameterJdbcTemplate
-                "users",      // Table name
-                filters,
-                search,
-                searchableColumns,
-                allowedColumns,
-                page,
-                size,
-                sortBy,
-                sortDir,
-                userRowMapper
-        );
-    }
+    return JdbcPaginationHelper.paginate(
+        jdbcTemplate, // Your NamedParameterJdbcTemplate
+        "users", // Table name
+        filters,
+        search,
+        searchableColumns,
+        allowedColumns,
+        page,
+        size,
+        sortBy,
+        sortDir,
+        userRowMapper);
+  }
 }
 
-
-//package org.example.sor_mrp.repository;
+// package org.example.sor_mrp.repository;
 //
-//import org.example.sor_mrp.user.User;
-//import org.example.sor_mrp.utils.JdbcPaginationHelper;
-//import org.springframework.jdbc.core.RowMapper;
-//import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-//import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-//import org.springframework.stereotype.Repository;
-//import java.util.ArrayList;
-//import java.util.List;
-//import java.util.Map;
-//import java.util.Optional;
+// import org.example.sor_mrp.user.User;
+// import org.example.sor_mrp.utils.JdbcPaginationHelper;
+// import org.springframework.jdbc.core.RowMapper;
+// import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+// import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+// import org.springframework.stereotype.Repository;
+// import java.util.ArrayList;
+// import java.util.List;
+// import java.util.Map;
+// import java.util.Optional;
 //
-//@Repository
-//public class JdbcUserRepository implements UserRepository {
+// @Repository
+// public class JdbcUserRepository implements UserRepository {
 //
 //    private final NamedParameterJdbcTemplate jdbcTemplate;
 //
@@ -189,7 +205,8 @@ public class JdbcUserRepository implements UserRepository {
 //    @Override
 //    public User save(User user) {
 //        String sql = """
-//        INSERT INTO users (first_name, last_name, email, password, auth_type, role, is_email_verified)
+//        INSERT INTO users (first_name, last_name, email, password, auth_type, role,
+// is_email_verified)
 //        VALUES (:firstName, :lastName, :email, :password, :authType, :role, :isEmailVerified)
 //        RETURNING id, created_at, updated_at
 //    """;
@@ -201,7 +218,8 @@ public class JdbcUserRepository implements UserRepository {
 //                .addValue("password", user.getPassword())
 //                .addValue("authType", user.getAuthType())
 //                .addValue("role", user.getRole() != null ? user.getRole() : "user")
-//                .addValue("isEmailVerified", user.getIsEmailVerified() != null ? user.getIsEmailVerified() : false);
+//                .addValue("isEmailVerified", user.getIsEmailVerified() != null ?
+// user.getIsEmailVerified() : false);
 //
 //        // Use queryForObject with a RowMapper to cleanly capture the returned ID and timestamps
 //        User savedUser = jdbcTemplate.queryForObject(sql, params, (rs, rowNum) -> {
@@ -271,9 +289,11 @@ public class JdbcUserRepository implements UserRepository {
 //
 //    @Override
 //    public JdbcPaginationHelper.PaginatedResult<User> findAllFiltered(
-//            Map<String, String> filters, String search, int page, int size, String sortBy, String sortDir
+//            Map<String, String> filters, String search, int page, int size, String sortBy, String
+// sortDir
 //    ) {
-//        List<String> allowedColumns = List.of("id", "first_name", "last_name", "email", "role", "created_at", "updated_at");
+//        List<String> allowedColumns = List.of("id", "first_name", "last_name", "email", "role",
+// "created_at", "updated_at");
 //        List<String> searchableColumns = List.of("first_name", "last_name", "email");
 //
 //        StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE 1=1");
@@ -297,7 +317,8 @@ public class JdbcUserRepository implements UserRepository {
 //        }
 //
 //        // 2. Global search across searchable columns
-//        if (search != null && !search.isBlank() && searchableColumns != null && !searchableColumns.isEmpty()) {
+//        if (search != null && !search.isBlank() && searchableColumns != null &&
+// !searchableColumns.isEmpty()) {
 //            sql.append(" AND (");
 //            countSql.append(" AND (");
 //            List<String> searchClauses = new ArrayList<>();
@@ -336,10 +357,12 @@ public class JdbcUserRepository implements UserRepository {
 //        params.addValue("offset", page * size);
 //
 //        // 5. Execute query
-//        List<User> results = jdbcTemplate.query(sql.toString(), params, (RowMapper<User>) userRowMapper);
+//        List<User> results = jdbcTemplate.query(sql.toString(), params, (RowMapper<User>)
+// userRowMapper);
 //
 //        int totalPages = (int) Math.ceil((double) totalResults / size);
 //
-//        return new JdbcPaginationHelper.PaginatedResult<>(results, totalResults, totalPages, page + 1, size);
+//        return new JdbcPaginationHelper.PaginatedResult<>(results, totalResults, totalPages, page
+// + 1, size);
 //    }
-//}
+// }

@@ -1,18 +1,25 @@
 package org.example.sor_mrp.user;
 
-import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper;
-
 import java.util.Map;
 import java.util.Optional;
+import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper;
 
 public interface UserRepository {
-    User save(User user);
-    Optional<User> findById(Long id);
-    Optional<User> findByEmail(String email);
-    User update(Long id, User user);
-    void deleteById(Long id);
+  User save(User user);
 
-    JdbcPaginationHelper.PaginatedResult<User> findAllFiltered(
-            Map<String, String> filters, String search, int page, int size, String sortBy, String sortDir
-    );
+  Optional<User> findById(Long id);
+
+  Optional<User> findByEmail(String email);
+
+  User update(Long id, User user);
+
+  void deleteById(Long id);
+
+  JdbcPaginationHelper.PaginatedResult<User> findAllFiltered(
+      Map<String, String> filters,
+      String search,
+      int page,
+      int size,
+      String sortBy,
+      String sortDir);
 }
