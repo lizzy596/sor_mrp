@@ -1,90 +1,56 @@
 package org.example.sor_mrp.bom;
 
-import jakarta.validation.Valid;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper.PaginatedResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/boms")
 public class BomController {
 
-  private final BomService bomService;
+    private final BomService bomService;
 
-  public BomController(BomService bomService) {
-    this.bomService = bomService;
-  }
+    public BomController(BomService bomService) {
+        this.bomService = bomService;
+    }
 
-  @PostMapping
-  @PreAuthorize("hasAuthority('manageBoms')")
-  public ResponseEntity<BomResponseDto> createBom(
-      @Valid @RequestBody CreateBomRequestDto requestDto) {
-    Bom createdBom = bomService.createBom(requestDto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(new BomResponseDto(createdBom));
-  }
+    @PostMapping
+    public ResponseEntity<Bom> createBom(@RequestBody Bom bom) {
+        Bom savedBom = bomService.save(bom);
+        return new ResponseEntity<>(savedBom, HttpStatus.CREATED);
+    }
 
-  @PutMapping("/{id}")
-  @PreAuthorize("hasAuthority('manageBoms')")
-  public ResponseEntity<BomResponseDto> updateBom(
-      @PathVariable Long id, @Valid @RequestBody UpdateBomRequestDto requestDto) {
-    Bom updatedBom = bomService.updateBom(id, requestDto);
-    return ResponseEntity.ok(new BomResponseDto(updatedBom));
-  }
+    @PutMapping("/{id}")
+    public ResponseEntity<Bom> updateBom(@PathVariable Long id, @RequestBody Bom bom) {
+        bom.setId(id);
+        Bom updatedBom = bomService.save(bom);
+        return ResponseEntity.ok(updatedBom);
+    }
 
-  @DeleteMapping("/{id}")
-  @PreAuthorize("hasAuthority('manageBoms')")
-  public ResponseEntity<Void> deleteBom(@PathVariable Long id) {
-    bomService.deleteBom(id);
-    return ResponseEntity.noContent().build();
-  }
+    @GetMapping("/{id}")
+    public ResponseEntity<Bom> getBomById(@PathVariable Long id) {
+        return bomService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-  @GetMapping("/{id}")
-  @PreAuthorize("hasAuthority('getBoms')")
-  public ResponseEntity<BomResponseDto> getBomById(@PathVariable Long id) {
-    Bom bom = bomService.findById(id);
-    return ResponseEntity.ok(new BomResponseDto(bom));
-  }
+    @GetMapping(params = "productNumber")
+    public ResponseEntity<List<Bom>> getBomByProductNumber(@RequestParam String productNumber) {
+        List<Bom> boms = bomService.findByProductNumber(productNumber);
+        return ResponseEntity.ok(boms);
+    }
 
-  @GetMapping("/parent/{parentItemId}")
-  @PreAuthorize("hasAuthority('getBoms')")
-  public ResponseEntity<List<BomResponseDto>> getComponentsByParentId(
-      @PathVariable Long parentItemId) {
-    List<BomResponseDto> responseDtos =
-        bomService.findComponentsByParentId(parentItemId).stream()
-            .map(BomResponseDto::new)
-            .collect(Collectors.toList());
-    return ResponseEntity.ok(responseDtos);
-  }
+    @GetMapping(params = "productDescription")
+    public ResponseEntity<List<Bom>> getBomByProductDescription(@RequestParam String productDescription) {
+        List<Bom> boms = bomService.findByProductDescription(productDescription);
+        return ResponseEntity.ok(boms);
+    }
 
-  @GetMapping("/child/{childItemId}")
-  @PreAuthorize("hasAuthority('getBoms')")
-  public ResponseEntity<List<BomResponseDto>> getWhereUsedByChildId(
-      @PathVariable Long childItemId) {
-    List<BomResponseDto> responseDtos =
-        bomService.findWhereUsedByChildId(childItemId).stream()
-            .map(BomResponseDto::new)
-            .collect(Collectors.toList());
-    return ResponseEntity.ok(responseDtos);
-  }
-
-  @GetMapping
-  @PreAuthorize("hasAuthority('getBoms')")
-  public ResponseEntity<PaginatedResult<BomDetail>> getPaginatedBoms(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size,
-      @RequestParam(defaultValue = "id") String sortBy,
-      @RequestParam(defaultValue = "ASC") String sortDir,
-      @RequestParam(required = false) String search,
-      @RequestParam(required = false) Map<String, String> filters) {
-
-    PaginatedResult<BomDetail> response =
-        bomService.getPaginatedBoms(page, size, sortBy, sortDir, search, filters);
-
-    return ResponseEntity.ok(response);
-  }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBom(@PathVariable Long id) {
+        bomService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }

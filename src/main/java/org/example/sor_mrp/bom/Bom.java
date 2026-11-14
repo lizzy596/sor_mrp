@@ -1,72 +1,61 @@
 package org.example.sor_mrp.bom;
 
-import java.math.BigDecimal;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+@Entity
+@Table(name = "bill_of_materials")
 public class Bom {
-  private Long id;
-  private Long parentItemId;
-  private Long childItemId;
-  private BigDecimal quantity;
-  private LocalDateTime createdAt;
-  private LocalDateTime updatedAt;
 
-  // Default constructor (required by Spring JDBC / RowMappers)
-  public Bom() {}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  // Convenience constructor for inserts
-  public Bom(Long parentItemId, Long childItemId, BigDecimal quantity) {
-    this.parentItemId = parentItemId;
-    this.childItemId = childItemId;
-    this.quantity = quantity;
-  }
+    @Column(name = "product_number", nullable = false, unique = true)
+    private String productNumber;
 
-  // Getters and Setters
-  public Long getId() {
-    return id;
-  }
+    @Column(name = "product_description", nullable = false)
+    private String productDescription;
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false, nullable = false)
+    private LocalDateTime createdAt;
 
-  public Long getParentItemId() {
-    return parentItemId;
-  }
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
-  public void setParentItemId(Long parentItemId) {
-    this.parentItemId = parentItemId;
-  }
+    public Bom() {}
 
-  public Long getChildItemId() {
-    return childItemId;
-  }
+    public Bom(String productNumber, String productDescription) {
+        this.productNumber = productNumber;
+        this.productDescription = productDescription;
+    }
 
-  public void setChildItemId(Long childItemId) {
-    this.childItemId = childItemId;
-  }
+    // Getters and Setters...
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getProductNumber() { return productNumber; }
+    public void setProductNumber(String productNumber) { this.productNumber = productNumber; }
+    public String getProductDescription() { return productDescription; }
+    public void setProductDescription(String productDescription) { this.productDescription = productDescription; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 
-  public BigDecimal getQuantity() {
-    return quantity;
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Bom bom = (Bom) o;
+        return Objects.equals(id, bom.id) && Objects.equals(productNumber, bom.productNumber);
+    }
 
-  public void setQuantity(BigDecimal quantity) {
-    this.quantity = quantity;
-  }
-
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(LocalDateTime createdAt) {
-    this.createdAt = createdAt;
-  }
-
-  public LocalDateTime getUpdatedAt() {
-    return updatedAt;
-  }
-
-  public void setUpdatedAt(LocalDateTime updatedAt) {
-    this.updatedAt = updatedAt;
-  }
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, productNumber);
+    }
 }
+

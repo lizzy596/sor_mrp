@@ -1,53 +1,42 @@
+
 package org.example.sor_mrp.bom;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import java.math.BigDecimal;
+import jakarta.validation.constraints.NotBlank;
 
 public class CreateBomRequestDto {
 
-  @NotNull(message = "Parent item ID is required")
-  private Long parentItemId;
+    @NotBlank(message = "Product number is required")
+    private String productNumber;
 
-  @NotNull(message = "Child item ID is required")
-  private Long childItemId;
+    @NotBlank(message = "Product description is required")
+    private String productDescription;
 
-  @NotNull(message = "Quantity is required")
-  @DecimalMin(value = "0.0001", message = "Quantity must be greater than zero")
-  private BigDecimal quantity;
+    // Default constructor
+    public CreateBomRequestDto() {
+    }
 
-  // Default constructor
-  public CreateBomRequestDto() {}
+    // Parameterized constructor
+    public CreateBomRequestDto(String productNumber, String productDescription) {
+        this.productNumber = productNumber;
+        this.productDescription = productDescription;
+    }
 
-  // Parameterized constructor
-  public CreateBomRequestDto(Long parentItemId, Long childItemId, BigDecimal quantity) {
-    this.parentItemId = parentItemId;
-    this.childItemId = childItemId;
-    this.quantity = quantity;
-  }
+    // Getter and Setter for productNumber
+    public String getProductNumber() {
+        return productNumber;
+    }
 
-  // Getters and Setters
-  public Long getParentItemId() {
-    return parentItemId;
-  }
+    public void setProductNumber(String productNumber) {
+        this.productNumber = productNumber;
+    }
 
-  public void setParentItemId(Long parentItemId) {
-    this.parentItemId = parentItemId;
-  }
+    // Getter and Setter for productDescription
+    public String getProductDescription() {
+        return productDescription;
+    }
 
-  public Long getChildItemId() {
-    return childItemId;
-  }
-
-  public void setChildItemId(Long childItemId) {
-    this.childItemId = childItemId;
-  }
-
-  public BigDecimal getQuantity() {
-    return quantity;
-  }
-
-  public void setQuantity(BigDecimal quantity) {
-    this.quantity = quantity;
-  }
+    public void setProductDescription(String productDescription) {
+        this.productDescription = productDescription;
+    }
 }
+

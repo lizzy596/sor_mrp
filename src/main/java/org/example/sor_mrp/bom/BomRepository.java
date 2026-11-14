@@ -1,29 +1,17 @@
 package org.example.sor_mrp.bom;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper.PaginatedResult;
 
-public interface BomRepository {
+@Repository
+public interface BomRepository extends JpaRepository<Bom, Long> {
 
-  Bom save(Bom bom);
+    // Spring Data JPA automatically generates queries from method names!
+    List<Bom> findByProductNumber(String productNumber);
 
-  Optional<Bom> findById(Long id);
+    List<Bom> findByProductDescriptionContainingIgnoreCase(String productDescription);
 
-  List<Bom> findByParentItemId(Long parentItemId);
-
-  List<Bom> findByChildItemId(Long childItemId);
-
-  void deleteById(Long id);
-
-  boolean existsByParentAndChild(Long parentItemId, Long childItemId);
-
-  PaginatedResult<BomDetail> findDetailedPaginated(
-      int page,
-      int size,
-      String sortBy,
-      String sortDir,
-      String search,
-      Map<String, String> filters);
+    boolean existsByProductNumberAndProductDescription(String productNumber, String productDescription);
 }
