@@ -1,7 +1,12 @@
 package org.example.sor_mrp.auth;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+@Entity
+@Table(name = "tokens") // Adjust if your database table name is different (e.g., "auth_tokens")
 public class Token {
 
   public enum TokenType {
@@ -11,13 +16,32 @@ public class Token {
     VERIFY_EMAIL
   }
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @Column(name = "user_id", nullable = false)
   private Long userId;
+
+  @Column(name = "token", nullable = false, unique = true)
   private String token;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "token_type", nullable = false)
   private TokenType tokenType;
+
+  @Column(name = "expires_at", nullable = false)
   private LocalDateTime expiresAt;
-  private Boolean blacklisted;
+
+  @Column(name = "blacklisted", nullable = false)
+  private Boolean blacklisted = false;
+
+  @CreationTimestamp
+  @Column(name = "created_at", updatable = false, nullable = false)
   private LocalDateTime createdAt;
+
+  @UpdateTimestamp
+  @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 
   // Constructors
@@ -98,7 +122,7 @@ public class Token {
 
   @Override
   public String toString() {
-    return "TokenRecord{"
+    return "Token{"
         + "id="
         + id
         + ", userId="

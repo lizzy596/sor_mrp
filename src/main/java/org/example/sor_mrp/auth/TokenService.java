@@ -128,8 +128,10 @@ public class TokenService {
       // Hash the incoming raw token to look up the database record
       String hashedToken = hashToken(rawToken);
 
+      // FIXED: Updated to match tokenRepository method name (findByTokenAndTokenType...)
       Optional<Token> tokenDoc =
-          tokenRepository.findByTokenAndTypeAndUserIdAndBlacklistedFalse(hashedToken, type, userId);
+          tokenRepository.findByTokenAndTokenTypeAndUserIdAndBlacklistedFalse(
+              hashedToken, type, userId);
 
       if (tokenDoc.isEmpty()) {
         throw new RuntimeException("Token not found or has been revoked");

@@ -66,8 +66,7 @@ public class AuthenticationController {
       return ResponseEntity.status(HttpStatus.CREATED)
           .body(Map.of("user", AuthDtos.UserResponse.fromUser(savedUser), "tokens", tokens));
     } catch (Exception e) {
-      e.printStackTrace(); // This will print the exact crash reason in your IntelliJ/terminal
-      // console
+      e.printStackTrace();
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(
               Map.of("message", e.getMessage() != null ? e.getMessage() : "Unknown server error"));
@@ -109,15 +108,15 @@ public class AuthenticationController {
       @RequestBody(required = false) AuthDtos.RefreshTokenRequest request,
       @CookieValue(name = "refreshToken", required = false) String cookieRefreshToken,
       HttpServletResponse response) {
-    // Fallback to checking request body or cookie for the refresh token
     String tokenToRevoke =
         (request != null && request.refreshToken() != null)
             ? request.refreshToken()
             : cookieRefreshToken;
 
     if (tokenToRevoke != null) {
+      // FIXED: Updated to findByTokenAndTokenType to match TokenRepository
       Optional<Token> tokenDoc =
-          tokenRepository.findByTokenAndType(tokenToRevoke, Token.TokenType.REFRESH);
+          tokenRepository.findByTokenAndTokenType(tokenToRevoke, Token.TokenType.REFRESH);
       tokenDoc.ifPresent(record -> tokenRepository.deleteById(record.getId()));
     }
 
@@ -156,7 +155,6 @@ public class AuthenticationController {
   public ResponseEntity<Void> forgotPassword(@RequestBody AuthDtos.ForgotPasswordRequest request) {
     String resetToken = tokenService.generateResetPasswordToken(request.email());
 
-    // TODO: Hook up your EmailService here to send resetToken to email
     System.out.println("Password Reset Token for " + request.email() + ": " + resetToken);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -175,7 +173,9 @@ public class AuthenticationController {
               .orElseThrow(() -> new RuntimeException("User not found"));
 
       user.setPassword(passwordEncoder.encode(request.password()));
-      userRepository.update(user.getId(), user);
+
+      // FIXED: Use userRepository.save() instead of update() for Hibernate
+      userRepository.save(user);
 
       // Clean up reset tokens for user
       tokenRepository.deleteById(tokenDoc.getId());
@@ -195,7 +195,6 @@ public class AuthenticationController {
 
     String verifyToken = tokenService.generateVerifyEmailToken(user);
 
-    // TODO: Hook up your EmailService here to send verification link
     System.out.println("Email Verification Token for " + email + ": " + verifyToken);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -212,7 +211,9 @@ public class AuthenticationController {
               .orElseThrow(() -> new RuntimeException("User not found"));
 
       user.setIsEmailVerified(true);
-      userRepository.update(user.getId(), user);
+
+      // FIXED: Use userRepository.save() instead of update() for Hibernate
+      userRepository.save(user);
 
       tokenRepository.deleteById(tokenDoc.getId());
 

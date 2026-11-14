@@ -5,7 +5,11 @@ CREATE TABLE bill_of_materials (
                                    id BIGSERIAL PRIMARY KEY,
                                    product_number TEXT NOT NULL REFERENCES items(item_number) ON DELETE CASCADE,
                                    product_description TEXT NOT NULL,
-)
+                                   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                                   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                                CONSTRAINT uq_bom_product UNIQUE (product_number)
+
+);
 
 CREATE INDEX idx_bom_product ON bill_of_materials(product_number);
 
@@ -19,8 +23,13 @@ SELECT item_type INTO product_type
 FROM items
 WHERE item_number = NEW.product_number;
 
-IF product_type NOT IN ('FINISHED_GOOD', 'SUB_ASSEMBLY') THEN
-        RAISE EXCEPTION 'Item "%" of type "%" cannot have a Bill of Materials', NEW.product_number, product_type;
+IF product_type IS NULL THEN
+    RAISE EXCEPTION 'Item "%" does not exist', NEW.product_number;
+END IF;
+
+IF product_type NOT IN ('FINAL', 'COMPONENT') THEN
+    RAISE EXCEPTION 'Item "%" of type "%" cannot have a Bill of Materials',
+        NEW.product_number, product_type;
 END IF;
 
 RETURN NEW;

@@ -61,7 +61,8 @@ public class UserService {
     existingUser.setLastName(updatedDetails.getLastName());
     existingUser.setRole(updatedDetails.getRole());
 
-    return userRepository.update(id, existingUser);
+    // FIXED: Use userRepository.save() for Hibernate updates since the entity has an ID
+    return userRepository.save(existingUser);
   }
 
   public void deleteUserById(Long id) {

@@ -23,7 +23,7 @@ public class ItemService {
     // 2. Map DTO to Domain Model
     Item item = new Item();
     item.setItemNumber(request.getItemNumber());
-    item.setItemType(request.getItemType() != null ? request.getItemType() : ItemType.RAW_MATERIAL);
+    item.setItemType(request.getItemType() != null ? request.getItemType() : ItemType.BASE);
     item.setQuantity(request.getQuantity());
     item.setDescription(request.getDescription());
 
@@ -59,7 +59,8 @@ public class ItemService {
     existingItem.setQuantity(request.getQuantity());
     existingItem.setDescription(request.getDescription());
 
-    return itemRepository.update(id, existingItem);
+    // FIXED: Use itemRepository.save() for Hibernate updates since the entity has an ID
+    return itemRepository.save(existingItem);
   }
 
   public void deleteItemById(Long id) {

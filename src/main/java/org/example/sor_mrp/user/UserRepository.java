@@ -1,25 +1,15 @@
 package org.example.sor_mrp.user;
 
-import java.util.Map;
 import java.util.Optional;
-import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface UserRepository {
-  User save(User user);
+@Repository
+public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryCustom {
 
-  Optional<User> findById(Long id);
-
+  // Spring Data JPA automatically implements this from the method name!
   Optional<User> findByEmail(String email);
 
-  User update(Long id, User user);
-
-  void deleteById(Long id);
-
-  JdbcPaginationHelper.PaginatedResult<User> findAllFiltered(
-      Map<String, String> filters,
-      String search,
-      int page,
-      int size,
-      String sortBy,
-      String sortDir);
+  // Note: save(), findById(), deleteById(), and update logic
+  // are now entirely handled out-of-the-box by JpaRepository!
 }

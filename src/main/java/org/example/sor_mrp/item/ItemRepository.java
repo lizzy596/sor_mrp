@@ -1,25 +1,14 @@
 package org.example.sor_mrp.item;
 
-import java.util.Map;
 import java.util.Optional;
-import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface ItemRepository {
-  Item save(Item item);
+@Repository
+public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositoryCustom {
 
-  Optional<Item> findById(Long id);
-
+  // Spring Data JPA automatically implements this query from the method name!
   Optional<Item> findByItemNumber(String itemNumber);
 
-  Item update(Long id, Item item);
-
-  void deleteById(Long id);
-
-  JdbcPaginationHelper.PaginatedResult<Item> findAllFiltered(
-      Map<String, String> filters,
-      String search,
-      int page,
-      int size,
-      String sortBy,
-      String sortDir);
+  // Note: save(), findById(), and deleteById() are now provided automatically!
 }

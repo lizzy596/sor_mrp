@@ -1,15 +1,37 @@
 package org.example.sor_mrp.item;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+@Entity
+@Table(name = "items") // Adjust if your table name is different
 public class Item {
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @Column(name = "item_number", nullable = false, unique = true)
   private String itemNumber;
+
+  @Column(name = "quantity", nullable = false)
   private Integer quantity;
+
+  @Column(name = "description")
   private String description;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "item_type", nullable = false)
   private ItemType itemType;
+
+  @CreationTimestamp
+  @Column(name = "created_at", updatable = false, nullable = false)
   private LocalDateTime createdAt;
+
+  @UpdateTimestamp
+  @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 
   // Default no-args constructor (required by frameworks like JPA and Jackson)
