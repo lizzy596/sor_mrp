@@ -12,6 +12,8 @@ public interface BomRepository extends JpaRepository<Bom, Long> {
 
   List<Bom> findByProductDescriptionContainingIgnoreCase(String productDescription);
 
+  boolean existsByProductNumber(String productNumber);
+
   boolean existsByProductNumberAndProductDescription(
       String productNumber, String productDescription);
 }
