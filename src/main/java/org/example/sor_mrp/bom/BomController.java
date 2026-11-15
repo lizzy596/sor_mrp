@@ -1,7 +1,13 @@
 package org.example.sor_mrp.bom;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import jakarta.validation.Valid;
+import org.example.sor_mrp.item.Item;
+
+import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,12 +30,46 @@ public class BomController {
     return new ResponseEntity<>(savedBom, HttpStatus.CREATED);
   }
 
+  // GET /api/boms?role=user&search=john&page=1&limit=10&sortBy=created_at&sortDir=DESC
+  @GetMapping
+  //@PreAuthorize("@securityEvaluator.hasAccess(authentication, null, 'getItems')")
+  public ResponseEntity<?> getBoms(
+          @RequestParam Map<String, String> allParams,
+          @RequestParam(defaultValue = "1") int page,
+          @RequestParam(defaultValue = "10") int limit,
+          @RequestParam(defaultValue = "created_at") String sortBy,
+          @RequestParam(defaultValue = "DESC") String sortDir,
+          @RequestParam(required = false) String search) {
+    // Separate out pagination/sorting parameters from custom table property filters
+    Map<String, String> filters = new HashMap<>(allParams);
+    filters.remove("page");
+    filters.remove("limit");
+    filters.remove("sortBy");
+    filters.remove("sortDir");
+    filters.remove("search");
+
+    JdbcPaginationHelper.PaginatedResult<Bom> result =
+            bomService.queryBoms(filters, search, page, limit, sortBy, sortDir);
+
+    // Map entities to safe response DTOs to hide private fields (like passwords)
+    // Map entities to safe response DTOs
+    List<BomResponseDto> bomResponses = result.results().stream()
+            .map(BomResponseDto::fromBom)
+            .toList();
+
+    return ResponseEntity.ok(
+            Map.of(
+                    "results", bomResponses,
+                    "page", result.page(),
+                    "limit", result.limit(),
+                    "totalPages", result.totalPages(),
+                    "totalResults", result.totalResults()));
+  }
+
   @GetMapping("/{id}")
-  public ResponseEntity<Bom> getBomById(@PathVariable Long id) {
-    return bomService
-            .findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+  public ResponseEntity<BomWithItemsResponseDto> getBomById(@PathVariable Long id) {
+    BomWithItemsResponseDto response = bomService.getBomWithItems(id);
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping(params = "productNumber")

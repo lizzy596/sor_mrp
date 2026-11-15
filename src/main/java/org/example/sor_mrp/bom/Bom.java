@@ -68,6 +68,14 @@ public class Bom {
     return updatedAt;
   }
 
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

@@ -1,17 +1,28 @@
 package org.example.sor_mrp.bom;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.example.sor_mrp.bom.bom_item.BomItem;
+import org.example.sor_mrp.bom.bom_item.BomItemRepository;
+import org.example.sor_mrp.bom.bom_item.BomItemService;
+import org.example.sor_mrp.item.Item;
+import org.example.sor_mrp.shared.configuration.exception.ResourceNotFoundException;
+import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BomService {
 
   private final BomRepository bomRepository;
+  private final BomItemRepository bomItemRepository;
 
-  public BomService(BomRepository bomRepository) {
+
+
+  public BomService(BomRepository bomRepository,  BomItemRepository bomItemRepository) {
     this.bomRepository = bomRepository;
+    this.bomItemRepository = bomItemRepository;
   }
 
   public Bom createBom(CreateBomRequestDto request) {
@@ -22,6 +33,18 @@ public class BomService {
 
     // 2. Save and return the entity
     return bomRepository.save(bom);
+  }
+
+  public BomWithItemsResponseDto getBomWithItems(Long id) {
+    // 1. Find the BOM by ID, or throw your custom 404 exception if it doesn't exist
+    Bom bom = bomRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("BOM not found with id: " + id));
+
+    // 2. Fetch all associated bom items using the product number string
+    List<BomItem> items = bomItemRepository.findByParentItemNumber(bom.getProductNumber());
+
+    // 3. Return combined response
+    return new BomWithItemsResponseDto(bom, items);
   }
 
   public Optional<Bom> findById(Long id) {
@@ -67,5 +90,17 @@ public class BomService {
   public boolean existsByProductNumberandDescription(String productNumber, String description) {
     // Fixed capitalization for 'And' so Spring Data JPA recognizes the keyword
     return bomRepository.existsByProductNumberAndProductDescription(productNumber, description);
+  }
+
+  public JdbcPaginationHelper.PaginatedResult<Bom> queryBoms(
+          Map<String, String> filters,
+          String search,
+          int page,
+          int size,
+          String sortBy,
+          String sortDir) {
+    // Adjust for 0-indexed pages if client sends 1-indexed (e.g., page=1 becomes 0)
+    int pageIndex = Math.max(0, page - 1);
+    return bomRepository.findAllFiltered(filters, search, pageIndex, size, sortBy, sortDir);
   }
 }

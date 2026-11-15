@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface BomRepository extends JpaRepository<Bom, Long> {
+public interface BomRepository extends JpaRepository<Bom, Long>, BomRepositoryCustom {
 
   // Spring Data JPA automatically generates queries from method names!
   List<Bom> findByProductNumber(String productNumber);
