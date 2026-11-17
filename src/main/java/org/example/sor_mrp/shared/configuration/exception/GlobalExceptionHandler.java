@@ -84,4 +84,34 @@ public class GlobalExceptionHandler {
             LocalDateTime.now());
     return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
+
+  // 5. Handle Database Integrity Violations (e.g., Unique Constraint Violations) -> 409 Conflict
+  @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+  public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+      org.springframework.dao.DataIntegrityViolationException ex, WebRequest request) {
+
+    ErrorResponse errorResponse =
+        new ErrorResponse(
+            HttpStatus.CONFLICT.value(),
+            HttpStatus.CONFLICT.getReasonPhrase(),
+            "A database constraint violation occurred. This item relationship may already exist.",
+            request.getDescription(false).replace("uri=", ""),
+            LocalDateTime.now());
+    return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+  }
+
+  // 6. Handle Illegal Arguments (e.g., Parent BOM not found) -> 400 Bad Request
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<ErrorResponse> handleIllegalArgument(
+      IllegalArgumentException ex, WebRequest request) {
+
+    ErrorResponse errorResponse =
+        new ErrorResponse(
+            HttpStatus.BAD_REQUEST.value(),
+            HttpStatus.BAD_REQUEST.getReasonPhrase(),
+            ex.getMessage(),
+            request.getDescription(false).replace("uri=", ""),
+            LocalDateTime.now());
+    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+  }
 }

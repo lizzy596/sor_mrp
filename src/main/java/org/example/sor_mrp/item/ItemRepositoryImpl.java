@@ -17,7 +17,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
       List.of(
           "id", "item_number", "quantity", "description", "item_type", "created_at", "updated_at");
 
-  private static final List<String> SEARCHABLE_COLUMNS = List.of("item_number", "description");
+  private static final List<String> SEARCHABLE_COLUMNS = List.of("item_number");
 
   public ItemRepositoryImpl(
       NamedParameterJdbcTemplate jdbcTemplate, JdbcPaginationHelper paginationHelper) {

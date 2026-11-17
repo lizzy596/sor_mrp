@@ -2,7 +2,10 @@ package org.example.sor_mrp.item;
 
 import jakarta.validation.Valid;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import org.example.sor_mrp.bom.BomService;
+import org.example.sor_mrp.bom.CreateBomRequestDto;
 import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,15 +17,26 @@ import org.springframework.web.bind.annotation.*;
 public class ItemController {
 
   private final ItemService itemService;
+  private final BomService bomService;
 
-  public ItemController(ItemService itemService) {
+  public ItemController(ItemService itemService, BomService bomService) {
+
     this.itemService = itemService;
+    this.bomService = bomService;
   }
 
   @PostMapping
   @PreAuthorize("@securityEvaluator.hasAccess(authentication, null, 'manageItems')")
   public ResponseEntity<Item> createItem(@Valid @RequestBody CreateItemRequestDto request) {
     Item createdItem = itemService.createItem(request);
+
+    if (request.getItemType() == ItemType.COMPONENT || request.getItemType() == ItemType.FINAL) {
+      CreateBomRequestDto bomRequest = new CreateBomRequestDto();
+      bomRequest.setProductNumber(createdItem.getItemNumber());
+      bomRequest.setProductDescription(createdItem.getDescription());
+      bomService.createBom(bomRequest);
+    }
+
     return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
   }
 
@@ -48,7 +62,9 @@ public class ItemController {
         itemService.queryItems(filters, search, page, limit, sortBy, sortDir);
 
     // Map entities to safe response DTOs to hide private fields (like passwords)
-    var itemResponses = result.results().stream().map(ItemResponseDto::fromItem).toList();
+    // Map entities to safe response DTOs
+    List<ItemResponseDto> itemResponses =
+        result.results().stream().map(ItemResponseDto::fromItem).toList();
 
     return ResponseEntity.ok(
         Map.of(
@@ -61,19 +77,21 @@ public class ItemController {
 
   @GetMapping("/{id}")
   @PreAuthorize("@securityEvaluator.hasAccess(authentication, #id.toString(), 'getItems')")
-  public ResponseEntity<Item> getItemById(@PathVariable Long id) {
+  public ResponseEntity<ItemResponseDto> getItemById(@PathVariable Long id) {
     return itemService
         .getItemById(id)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+        .map(ItemResponseDto::fromItem) // Map the Item entity to ItemResponseDto if found
+        .map(ResponseEntity::ok) // Wrap in a 200 OK response
+        .orElse(ResponseEntity.notFound().build()); // Return 404 Not Found if missing
   }
 
   @PutMapping("/{id}")
   @PreAuthorize("@securityEvaluator.hasAccess(authentication, #id.toString(), 'manageItems')")
-  public ResponseEntity<Item> updateItemById(
+  public ResponseEntity<ItemResponseDto> updateItemById(
       @PathVariable Long id, @Valid @RequestBody UpdateItemRequestDto request) {
     Item updatedItem = itemService.updateItemById(id, request);
-    return ResponseEntity.ok(updatedItem);
+    ItemResponseDto responseDto = ItemResponseDto.fromItem(updatedItem);
+    return ResponseEntity.ok(responseDto);
   }
 
   @DeleteMapping("/{id}")

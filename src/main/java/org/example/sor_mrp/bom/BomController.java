@@ -1,12 +1,9 @@
 package org.example.sor_mrp.bom;
 
+import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import jakarta.validation.Valid;
-import org.example.sor_mrp.item.Item;
-
 import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,14 +29,14 @@ public class BomController {
 
   // GET /api/boms?role=user&search=john&page=1&limit=10&sortBy=created_at&sortDir=DESC
   @GetMapping
-  //@PreAuthorize("@securityEvaluator.hasAccess(authentication, null, 'getItems')")
+  // @PreAuthorize("@securityEvaluator.hasAccess(authentication, null, 'getItems')")
   public ResponseEntity<?> getBoms(
-          @RequestParam Map<String, String> allParams,
-          @RequestParam(defaultValue = "1") int page,
-          @RequestParam(defaultValue = "10") int limit,
-          @RequestParam(defaultValue = "created_at") String sortBy,
-          @RequestParam(defaultValue = "DESC") String sortDir,
-          @RequestParam(required = false) String search) {
+      @RequestParam Map<String, String> allParams,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "10") int limit,
+      @RequestParam(defaultValue = "created_at") String sortBy,
+      @RequestParam(defaultValue = "DESC") String sortDir,
+      @RequestParam(required = false) String search) {
     // Separate out pagination/sorting parameters from custom table property filters
     Map<String, String> filters = new HashMap<>(allParams);
     filters.remove("page");
@@ -49,21 +46,20 @@ public class BomController {
     filters.remove("search");
 
     JdbcPaginationHelper.PaginatedResult<Bom> result =
-            bomService.queryBoms(filters, search, page, limit, sortBy, sortDir);
+        bomService.queryBoms(filters, search, page, limit, sortBy, sortDir);
 
     // Map entities to safe response DTOs to hide private fields (like passwords)
     // Map entities to safe response DTOs
-    List<BomResponseDto> bomResponses = result.results().stream()
-            .map(BomResponseDto::fromBom)
-            .toList();
+    List<BomResponseDto> bomResponses =
+        result.results().stream().map(BomResponseDto::fromBom).toList();
 
     return ResponseEntity.ok(
-            Map.of(
-                    "results", bomResponses,
-                    "page", result.page(),
-                    "limit", result.limit(),
-                    "totalPages", result.totalPages(),
-                    "totalResults", result.totalResults()));
+        Map.of(
+            "results", bomResponses,
+            "page", result.page(),
+            "limit", result.limit(),
+            "totalPages", result.totalPages(),
+            "totalResults", result.totalResults()));
   }
 
   @GetMapping("/{id}")
@@ -87,14 +83,14 @@ public class BomController {
 
   @GetMapping(params = "productDescription")
   public ResponseEntity<List<Bom>> getBomByProductDescription(
-          @RequestParam String productDescription) {
+      @RequestParam String productDescription) {
     List<Bom> boms = bomService.findByProductDescription(productDescription);
     return ResponseEntity.ok(boms);
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<BomResponseDto> updateBomById(
-          @PathVariable Long id, @Valid @RequestBody UpdateBomRequestDto request) {
+      @PathVariable Long id, @Valid @RequestBody UpdateBomRequestDto request) {
 
     Bom updatedBom = bomService.updateBomById(id, request);
 
@@ -102,6 +98,7 @@ public class BomController {
 
     return ResponseEntity.ok(responseDto);
   }
+
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteBom(@PathVariable Long id) {
     bomService.deleteById(id);
