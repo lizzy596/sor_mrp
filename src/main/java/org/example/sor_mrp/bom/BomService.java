@@ -6,8 +6,8 @@ import java.util.Optional;
 
 import org.example.sor_mrp.bom.bom_item.BomItem;
 import org.example.sor_mrp.bom.bom_item.BomItemRepository;
-import org.example.sor_mrp.bom.bom_item.BomItemService;
 import org.example.sor_mrp.item.Item;
+import org.example.sor_mrp.item.ItemRepository;
 import org.example.sor_mrp.shared.configuration.exception.ResourceNotFoundException;
 import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper;
 import org.springframework.stereotype.Service;
@@ -17,12 +17,14 @@ public class BomService {
 
   private final BomRepository bomRepository;
   private final BomItemRepository bomItemRepository;
+  private final ItemRepository itemRepository;
 
 
 
-  public BomService(BomRepository bomRepository,  BomItemRepository bomItemRepository) {
+  public BomService(BomRepository bomRepository,  BomItemRepository bomItemRepository, ItemRepository itemRepository) {
     this.bomRepository = bomRepository;
     this.bomItemRepository = bomItemRepository;
+    this.itemRepository = itemRepository;
   }
 
   public Bom createBom(CreateBomRequestDto request) {
@@ -47,6 +49,29 @@ public class BomService {
     return new BomWithItemsResponseDto(bom, items);
   }
 
+  public BomWithItemsResponseDto getBomByItemId(Long itemId) {
+    // 1. Find the item or throw a 404
+    Item item = itemRepository.findById(itemId)
+            .orElseThrow(() -> new ResourceNotFoundException("Item not found with id: " + itemId));
+
+    // 2. Find the BOM using the repository's List return type
+    List<Bom> boms = bomRepository.findByProductNumber(item.getItemNumber());
+
+    // 3. Check if the list is empty, otherwise grab the single BOM
+    if (boms.isEmpty()) {
+      throw new ResourceNotFoundException("BOM not found for item number: " + item.getItemNumber());
+    }
+    Bom bom = boms.get(0); // Safe because product_number has a unique constraint
+
+    // 4. Fetch all component items associated with this product number
+    List<BomItem> bomItems = bomItemRepository.findByParentItemNumber(bom.getProductNumber());
+
+    // 5. Return combined response DTO
+    return new BomWithItemsResponseDto(bom, bomItems);
+  }
+
+
+
   public Optional<Bom> findById(Long id) {
     return bomRepository.findById(id);
   }
@@ -59,6 +84,8 @@ public class BomService {
     // Updated to match the JPA repository query method
     return bomRepository.findByProductDescriptionContainingIgnoreCase(productDescription);
   }
+
+
 
   public Bom updateBomById(Long id, UpdateBomRequestDto request) {
     // 1. Find the existing BOM or throw an exception

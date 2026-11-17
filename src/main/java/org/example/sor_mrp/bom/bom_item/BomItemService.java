@@ -3,7 +3,10 @@ package org.example.sor_mrp.bom.bom_item;
 import jakarta.transaction.Transactional;
 import org.example.sor_mrp.bom.BomRepository;
 import java.util.List;
+import java.util.Optional;
 
+import org.example.sor_mrp.item.Item;
+import org.example.sor_mrp.item.UpdateItemRequestDto;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -54,5 +57,79 @@ public class BomItemService {
         // If a duplicate unique constraint hits, DataIntegrityViolationException is thrown
         // and caught automatically by your GlobalExceptionHandler -> returns 409 Conflict.
         return bomItemRepository.saveAll(bomItems);
+    }
+
+
+    @Transactional
+    public List<BomItem> updateBomItemsBatch(BatchUpdateBomItemRequestDto request) {
+        // 1. Verify parent BOM exists once
+        boolean bomExists = bomRepository.existsByProductNumber(request.getParentItemNumber());
+        if (!bomExists) {
+            throw new IllegalArgumentException("Parent BOM not found: " + request.getParentItemNumber());
+        }
+
+        List<BomItem> processedItems = new java.util.ArrayList<>();
+
+        for (BatchUpdateBomItemRequestDto.ItemDetail detail : request.getItems()) {
+            String parentNo = request.getParentItemNumber();
+            String childNo = detail.getChildItemNumber();
+            java.math.BigDecimal quantity = detail.getQuantity();
+
+            // Find if this item relationship already exists in the database
+            java.util.Optional<BomItem> existingItemOpt = bomItemRepository.findByParentItemNumberAndChildItemNumber(parentNo, childNo);
+
+            // Check if quantity is 0 (or less/equal to 0 depending on your exact business rule)
+            if (quantity.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+                // If it exists, delete it. If it doesn't exist, do nothing.
+                existingItemOpt.ifPresent(bomItemRepository::delete);
+            } else {
+                // Quantity is greater than 0: Update or Create (Upsert)
+                BomItem bomItem;
+                if (existingItemOpt.isPresent()) {
+                    bomItem = existingItemOpt.get();
+                    bomItem.setQuantity(quantity);
+                } else {
+                    bomItem = new BomItem();
+                    bomItem.setParentItemNumber(parentNo);
+                    bomItem.setChildItemNumber(childNo);
+                    bomItem.setQuantity(quantity);
+                }
+                processedItems.add(bomItemRepository.save(bomItem));
+            }
+        }
+
+        return processedItems;
+    }
+    public BomItem updateBomItemById(Long id, UpdateBomItemRequestDto request) {
+        // 1. Ensure the BOM item exists before updating
+        BomItem existingBomItem =
+                bomItemRepository
+                        .findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("BOM item not found with id: " + id));
+
+        // 2. If the child item number is changing, verify it doesn't already conflict in this BOM context
+        if (!existingBomItem.getChildItemNumber().equals(request.getChildItemNumber())) {
+            Optional<BomItem> existingMatch = bomItemRepository.findByParentItemNumberAndChildItemNumber(
+                    existingBomItem.getParentItemNumber(),
+                    request.getParentItemNumber()
+            );
+            if (existingMatch.isPresent()) {
+                throw new IllegalStateException("Item already exists in this BOM: " + request.getChildItemNumber());
+            }
+        }
+
+        // 3. Update the fields that actually exist on the BomItem entity
+        existingBomItem.setChildItemNumber(request.getChildItemNumber());
+        existingBomItem.setQuantity(request.getQuantity());
+
+        // 4. Save and return updated entity
+        return bomItemRepository.save(existingBomItem);
+    }
+
+    public void deleteBomItemById(Long id) {
+        if (!bomItemRepository.existsById(id)) {
+            throw new IllegalArgumentException("BOM item not found with id: " + id);
+        }
+        bomItemRepository.deleteById(id);
     }
 }

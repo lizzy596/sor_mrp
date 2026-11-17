@@ -72,6 +72,13 @@ public class BomController {
     return ResponseEntity.ok(response);
   }
 
+  @GetMapping("/{itemId}/bom")
+  @PreAuthorize("@securityEvaluator.hasAccess(authentication, #itemId.toString(), 'getItems')")
+  public ResponseEntity<BomWithItemsResponseDto> getBomByItemId(@PathVariable Long itemId) {
+    BomWithItemsResponseDto response = bomService.getBomByItemId(itemId);
+    return ResponseEntity.ok(response);
+  }
+
   @GetMapping(params = "productNumber")
   public ResponseEntity<List<Bom>> getBomByProductNumber(@RequestParam String productNumber) {
     List<Bom> boms = bomService.findByProductNumber(productNumber);
@@ -89,13 +96,10 @@ public class BomController {
   public ResponseEntity<BomResponseDto> updateBomById(
           @PathVariable Long id, @Valid @RequestBody UpdateBomRequestDto request) {
 
-    // 1. Call the service to update the BOM entity
     Bom updatedBom = bomService.updateBomById(id, request);
 
-    // 2. Map the updated BOM entity to a BomResponseDto using the correct factory method
     BomResponseDto responseDto = BomResponseDto.fromBom(updatedBom);
 
-    // 3. Return the clean response DTO with a 200 OK status
     return ResponseEntity.ok(responseDto);
   }
   @DeleteMapping("/{id}")
