@@ -1,6 +1,6 @@
 package org.example.sor_mrp.workorder;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record WorkOrderResponseDto(
         Long id,
@@ -10,8 +10,9 @@ public record WorkOrderResponseDto(
         Integer quantity,
         Long assignedTo,
         Long createdBy,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        OffsetDateTime dueBy,
+        OffsetDateTime createdAt,
+        OffsetDateTime updatedAt
 ) {
     public static WorkOrderResponseDto from(WorkOrder entity) {
         return new WorkOrderResponseDto(
@@ -22,6 +23,7 @@ public record WorkOrderResponseDto(
                 entity.getQuantity(),
                 entity.getAssignedTo(),
                 entity.getCreatedBy(),
+                entity.getDueBy(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );

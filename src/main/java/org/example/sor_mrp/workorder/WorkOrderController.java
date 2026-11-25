@@ -1,5 +1,6 @@
 package org.example.sor_mrp.workorder;
 
+import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -22,15 +23,6 @@ public class WorkOrderController {
         this.workOrderService = workOrderService;
     }
 
-    public record CreateWorkOrderRequest(
-            String workOrderNumber,
-            WorkOrder.Status status,
-            Long targetItemId,
-            Integer quantity,
-            Long assignedTo,
-            Long createdBy
-    ) {}
-
     public record UpdateStatusRequest(
             WorkOrder.Status status
     ) {}
@@ -46,18 +38,20 @@ public class WorkOrderController {
     }
 
     @PostMapping
-    public ResponseEntity<WorkOrderResponseDto> create(@RequestBody CreateWorkOrderRequest request) {
-        WorkOrderResponseDto created = workOrderService.create(
-                request.workOrderNumber(),
-                request.status(),
-                request.targetItemId(),
-                request.quantity(),
-                request.assignedTo(),
-                request.createdBy()
-        );
+    public ResponseEntity<WorkOrderResponseDto> create(
+            @Valid @RequestBody CreateWorkOrderRequestDto request) {
+        Long createdBy = resolveCurrentUserId();
+        WorkOrderResponseDto created = workOrderService.create(request, createdBy);
         return ResponseEntity
                 .created(URI.create("/api/work-orders/" + created.id()))
                 .body(created);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<WorkOrderResponseDto> update(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateWorkOrderRequestDto request) {
+        return ResponseEntity.ok(workOrderService.update(id, request));
     }
 
     @PatchMapping("/{id}/status")
@@ -71,5 +65,10 @@ public class WorkOrderController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         workOrderService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private Long resolveCurrentUserId() {
+        // Replace with your authenticated user lookup from SecurityContext / principal
+        return 1L;
     }
 }
