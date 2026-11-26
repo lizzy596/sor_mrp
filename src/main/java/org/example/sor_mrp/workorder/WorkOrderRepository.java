@@ -1,6 +1,9 @@
 package org.example.sor_mrp.workorder;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
+@Repository
+
+public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long>, WorkOrderRepositoryCustom {
 }

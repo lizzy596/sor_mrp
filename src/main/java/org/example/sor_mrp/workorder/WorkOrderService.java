@@ -3,10 +3,12 @@ package org.example.sor_mrp.workorder;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.example.sor_mrp.bom.bom_item.BomItem;
 import org.example.sor_mrp.item.Item;
+import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper;
 import org.example.sor_mrp.workorder.workorder_reconciliation.WorkOrderReconciliation;
 import org.example.sor_mrp.workorder.workorder_reconciliation.WorkOrderReconciliationRepository;
 import org.springframework.stereotype.Service;
@@ -121,5 +123,17 @@ public class WorkOrderService {
             throw new NoSuchElementException("WorkOrder not found: " + id);
         }
         workOrderRepository.deleteById(id);
+    }
+
+    public JdbcPaginationHelper.PaginatedResult<WorkOrder> queryWorkOrders(
+            Map<String, String> filters,
+            String search,
+            int page,
+            int size,
+            String sortBy,
+            String sortDir) {
+        // Adjust for 0-indexed pages if client sends 1-indexed (e.g., page=1 becomes 0)
+        int pageIndex = Math.max(0, page - 1);
+        return workOrderRepository.findAllFiltered(filters, search, pageIndex, size, sortBy, sortDir);
     }
 }

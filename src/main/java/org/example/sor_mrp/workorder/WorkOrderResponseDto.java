@@ -28,4 +28,8 @@ public record WorkOrderResponseDto(
                 entity.getUpdatedAt()
         );
     }
+
+    public static Object fromWorkOrder(WorkOrder workOrder) {
+        return null;
+    }
 }
