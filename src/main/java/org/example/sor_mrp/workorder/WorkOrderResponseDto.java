@@ -15,6 +15,9 @@ public record WorkOrderResponseDto(
         OffsetDateTime updatedAt
 ) {
     public static WorkOrderResponseDto from(WorkOrder entity) {
+        if (entity == null) {
+            return null;
+        }
         return new WorkOrderResponseDto(
                 entity.getId(),
                 entity.getWorkOrderNumber(),
@@ -29,7 +32,7 @@ public record WorkOrderResponseDto(
         );
     }
 
-    public static Object fromWorkOrder(WorkOrder workOrder) {
-        return null;
+    public static WorkOrderResponseDto fromWorkOrder(WorkOrder entity) {
+        return from(entity);
     }
 }

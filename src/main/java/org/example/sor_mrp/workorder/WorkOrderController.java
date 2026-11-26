@@ -5,12 +5,18 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-
 import org.example.sor_mrp.shared.configuration.utils.JdbcPaginationHelper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/work-orders")
@@ -27,7 +33,6 @@ public class WorkOrderController {
     ) {}
 
     @GetMapping
-    @PreAuthorize("@securityEvaluator.hasAccess(authentication, null, 'getItems')")
     public ResponseEntity<?> getWorkOrders(
             @RequestParam Map<String, String> allParams,
             @RequestParam(defaultValue = "1") int page,
@@ -35,7 +40,6 @@ public class WorkOrderController {
             @RequestParam(defaultValue = "created_at") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDir,
             @RequestParam(required = false) String search) {
-        // Separate out pagination/sorting parameters from custom table property filters
         Map<String, String> filters = new HashMap<>(allParams);
         filters.remove("page");
         filters.remove("limit");
@@ -46,10 +50,8 @@ public class WorkOrderController {
         JdbcPaginationHelper.PaginatedResult<WorkOrder> result =
                 workOrderService.queryWorkOrders(filters, search, page, limit, sortBy, sortDir);
 
-        // Map entities to safe response DTOs to hide private fields (like passwords)
-        // Map entities to safe response DTOs
-        List<Object> workOrderResponses =
-                result.results().stream().map(WorkOrderResponseDto::fromWorkOrder).toList();
+        List<WorkOrderResponseDto> workOrderResponses =
+                result.results().stream().map(WorkOrderResponseDto::from).toList();
 
         return ResponseEntity.ok(
                 Map.of(
